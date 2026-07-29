@@ -1,0 +1,15 @@
+{
+  "name": "cloud-filecoin",
+  "private": true,
+  "scripts": {
+    "test:cljs": "nbb --classpath \"$(clojure -A:cljs -Spath)\" scripts/verify-cljs.cljs",
+    "vectors": "nbb testdata/gen_vectors.cljs > test/filecoin/cloud/vectors.cljc"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.0.1"
+  },
+  "devDependencies": {
+    "@filoz/synapse-core": "^0.7.1",
+    "viem": "^2.55.10"
+  }
+}

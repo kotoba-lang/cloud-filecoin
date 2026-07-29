@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  jvm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          cli: latest
+      - run: clojure -M:lint
+      - run: clojure -M:test
+
+  cljs:
+    # Not redundant with the JVM job: SHA-256 comes from a different provider
+    # on each runtime, a byte is signed on one and not the other, and the ABI
+    # words go through BigInt here and BigInteger there. The SDK's PieceCIDs
+    # come out the same on both or one of those is wrong.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          cli: latest
+      - run: npm install -g nbb
+      # @noble/hashes is not used directly; io-multiformats' :cljs branch
+      # loads it at require time for SHA-256.
+      - run: npm ci
+      - run: nbb --classpath "$(clojure -A:cljs -Spath)" scripts/verify-cljs.cljs
+
+  vectors:
+    # PieceCIDs, selectors and addresses all come from upstream packages.
+    # Regenerate and fail if they have drifted — which for the addresses means
+    # a redeployment, and is worth failing loudly for.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install -g nbb
+      - run: npm ci
+      - name: Regenerate and compare
+        run: |
+          set -euo pipefail
+          nbb testdata/gen_vectors.cljs > /tmp/vectors.cljc
+          diff -u test/filecoin/cloud/vectors.cljc /tmp/vectors.cljc
