@@ -17,6 +17,7 @@ Companion to [`io-filecoin`](https://github.com/kotoba-lang/io-filecoin)
 | `filecoin.cloud.pdp` | PDPVerifier: data sets, pieces, proofs. |
 | `filecoin.cloud.pay` | Payment rails, and the operator approval that funds them. |
 | `filecoin.cloud.warm` | Warm Storage, and its separate state-view contract. |
+| `filecoin.cloud.evm` | Calldata → a Filecoin message. Where the two halves join. |
 
 ## What Onchain Cloud is
 
@@ -94,7 +95,7 @@ Three oracles, none of them this library:
   claims that is not in that table fails as a missing entry.
 - **Addresses** from `@filoz/synapse-core/chains`, as published.
 
-Both runtimes run the whole suite. **476 assertions, green on both.**
+Both runtimes run the whole suite. **499 assertions, green on both.**
 
 ```sh
 clojure -M:test        # JVM
@@ -105,7 +106,12 @@ npm install && npm run vectors   # regenerate
 ## What is not here
 
 - **Signing and transport.** No keys, no sockets. These namespaces return
-  calldata; sending it is `base-l2`'s `rpc`, or your own.
+  calldata and messages; signing and sending are yours.
+- **Gas and nonce.** `evm/invoke` carries whatever you give it.
+  `gas-limit`/`gas-fee-cap`/`gas-premium` come from
+  `Filecoin.GasEstimateMessageGas` and `nonce` from `Filecoin.MpoolGetNonce`
+  — both are calls, and nothing here makes calls. `filecoin.rpc` builds the
+  request bodies.
 - **Proof generation.** Answering a PDP challenge means holding the data and
   producing Merkle paths into it. This library computes the commitment, not
   the proofs.

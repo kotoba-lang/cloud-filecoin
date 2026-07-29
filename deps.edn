@@ -16,7 +16,7 @@
 ;; signing, no transport, no socket.
 {:paths ["src"]
  :deps {io.github.kotoba-lang/io-filecoin
-        {:git/sha "8e6a753f4805c5c9e0c0ebf030d9bf113aa4a775"}
+        {:git/sha "b28b628c4c5ffa3594ce8242eefd286352a464b7"}
         io.github.kotoba-lang/org-ethereum-abi
         {:git/sha "f3e5662d86977b50224e5e890f953cb5e4b3f441"}
         io.github.kotoba-lang/io-multiformats

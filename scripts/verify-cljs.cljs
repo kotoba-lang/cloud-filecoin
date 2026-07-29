@@ -5,6 +5,7 @@
 (ns verify-cljs
   (:require [clojure.test :as t]
             [filecoin.cloud.contracts-test]
+            [filecoin.cloud.evm-test]
             [filecoin.cloud.piece-test]))
 
 (defmethod t/report [:cljs.test/default :end-run-tests] [m]
@@ -15,4 +16,5 @@
         (js/process.exit 1))))
 
 (t/run-tests 'filecoin.cloud.contracts-test
+             'filecoin.cloud.evm-test
              'filecoin.cloud.piece-test)
