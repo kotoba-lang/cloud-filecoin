@@ -40,6 +40,43 @@ The consequence worth knowing before writing any of it: proving and paying are
 separate contracts. A data set can be proven for a service that has stopped
 paying, and a rail can run for a data set that has stopped being proven.
 
+## Calling a contract
+
+An FEVM contract is also an ordinary Filecoin actor with an `f410f…` address,
+so calling it is an ordinary Filecoin message — no Ethereum transaction, no
+RLP, no keccak:
+
+```clojure
+(require '[filecoin.cloud.evm :as evm]
+         '[filecoin.cloud.pdp :as pdp])
+
+(evm/call-message :calibration :pdp-verifier
+                  (pdp/call :data-set-live ["42"])
+                  {:from "t1…" :nonce 7 :gas-limit 20000000
+                   :gas-fee-cap "1000" :gas-premium "500"})
+;; => a filecoin.message, ready for signing-bytes and MpoolPush
+```
+
+```
+to      the contract's f410f address     (not its 0x… form)
+method  filecoin.method/invoke-contract  (FRC-0042 "InvokeEVM" = 3844450837)
+params  the calldata, as a CBOR byte string
+```
+
+Three details, each of which produces a well-formed message that does the
+wrong thing:
+
+- **`params` is CBOR-wrapped, not raw.** `InvokeContract` takes
+  `abi.CborBytes`. Passing the calldata unwrapped gives the actor a parameter
+  block it cannot decode, and the message reverts having already paid gas.
+- **`to` is the `f410f` form.** `chain/contract` returns `0x…` because that is
+  what an explorer and an ABI show; a message field takes address bytes.
+- **The sender decides the signature type.** An `f1` sender signs the message
+  CID (secp256k1), which `io-filecoin` can produce. An `f410f` sender signs the
+  **RLP-encoded Ethereum transaction** (delegated) — a different payload
+  entirely, which it deliberately cannot. The native `f1` path is the one that
+  works end to end.
+
 ## PieceCID v2
 
 ```clojure
