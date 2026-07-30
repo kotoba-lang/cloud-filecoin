@@ -6,7 +6,8 @@
   (:require [clojure.test :as t]
             [filecoin.cloud.contracts-test]
             [filecoin.cloud.evm-test]
-            [filecoin.cloud.piece-test]))
+            [filecoin.cloud.piece-test]
+            [filecoin.cloud.provider-test]))
 
 (defmethod t/report [:cljs.test/default :end-run-tests] [m]
   (println)
@@ -17,4 +18,5 @@
 
 (t/run-tests 'filecoin.cloud.contracts-test
              'filecoin.cloud.evm-test
-             'filecoin.cloud.piece-test)
+             'filecoin.cloud.piece-test
+             'filecoin.cloud.provider-test)

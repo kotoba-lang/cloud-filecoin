@@ -17,6 +17,7 @@ Companion to [`io-filecoin`](https://github.com/kotoba-lang/io-filecoin)
 | `filecoin.cloud.pdp` | PDPVerifier: data sets, pieces, proofs. |
 | `filecoin.cloud.pay` | Payment rails, and the operator approval that funds them. |
 | `filecoin.cloud.warm` | Warm Storage, and its separate state-view contract. |
+| `filecoin.cloud.provider` | The storage provider's PDP HTTP API — the transfer surface. |
 | `filecoin.cloud.evm` | Calldata → a Filecoin message. Where the two halves join. |
 
 ## What Onchain Cloud is
@@ -132,13 +133,63 @@ Three oracles, none of them this library:
   claims that is not in that table fails as a missing entry.
 - **Addresses** from `@filoz/synapse-core/chains`, as published.
 
-Both runtimes run the whole suite. **499 assertions, green on both.**
+Both runtimes run the whole suite. **537 assertions, green on both.**
 
 ```sh
 clojure -M:test        # JVM
 npm run test:cljs      # nbb
 npm install && npm run vectors   # regenerate
 ```
+
+## The provider transfer surface
+
+Everything else here is on-chain and moves no bytes. `filecoin.cloud.provider`
+is the other half — an ordinary HTTP API rooted at a provider's `serviceURL`:
+
+```
+GET  pdp/ping                     is it alive
+GET  pdp/piece?pieceCid=<cid>     is this piece here   (200 / 202 processing / 404)
+POST pdp/piece                    begin an upload      (200 = already has it)
+PUT  pdp/piece/upload/<uuid>      send the bytes
+GET  piece/<cid>                  retrieve
+```
+
+**The upload carries no auth.** Authorisation is the on-chain `addPieces`,
+which the client signs — a provider will park bytes for anyone, but only a
+signed transaction makes them part of a data set somebody is paid to prove. So
+an upload alone stores nothing durably.
+
+**`POST pdp/piece` returning 200 means stop.** The provider already has the
+piece; content addressing deduplicated it. Treating 200 as "proceed" re-sends
+the whole payload for nothing, and treating a missing `Location` as success
+loses the data silently.
+
+### Always verify what a provider serves
+
+`verify-bytes` recomputes the PieceCID from the bytes received. This is not
+belt-and-braces. Measured against mainnet on 2026-07-30, for one piece the
+PDPVerifier says is live:
+
+| providers reporting `:present` | 13 |
+|---|---|
+| served a 27-byte nginx placeholder as `application/octet-stream`, status 200 | 1 |
+| served an identical **wrong** 81,918 bytes | 10 |
+| served the real 204,898 bytes | **2** |
+
+Eleven of thirteen looked like a success at the HTTP layer. Only recomputing
+the CID tells them apart.
+
+`scripts/probe-provider.cljs` in `io-filecoin-transport` runs that loop:
+chain `getPieceCid` → `ping` → `find` → `GET piece/<cid>` → recompute.
+
+### One protocol limitation this exposed
+
+`filecoin.protocols/IHttp` specifies `body` as a **String**, and
+`filecoin.transport` builds it with `.text()`. Correct for JSON-RPC, wrong for
+a piece: UTF-8 decoding rewrites every byte above `0x7f`, so binary cannot
+survive the protocol as specified. The probe bypasses `IHttp` with
+`arrayBuffer` and says so; widening the protocol is the real fix and is not
+done here.
 
 ## What is not here
 
