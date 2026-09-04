@@ -47,7 +47,9 @@
 (defn -main [& [height-s ts-s]]
   (let [claimed-height (Long/parseLong height-s)
         block-timestamp (Long/parseLong ts-s)
-        {:keys [status result]} (run-probe claimed-height block-timestamp)
+        probe (run-probe claimed-height block-timestamp)
+        {:keys [status result]} (:evidence probe)
+        ;; the measured result rides the EVIDENCE map, not the report
         word (long result)
         base 1000000000000
         abs-delta (quot (- word base) 1048576)
