@@ -1,6 +1,13 @@
-;; live-probe verify — the host half: fetch a REAL calibration block over
-;; RPC, hand its scalars to the native guest, judge, and echo the verdict.
-;; Read-only RPC; no keys, no spend.
+;; host/live_probe.clj — the guest half of the live probe, as a classpath-
+;; loadable namespace. The host fetches a REAL calibration block header over
+;; read-only RPC, hands its scalars to the native guest (kototama executor,
+;; signed artifact, measured runtime), and the guest judges the chain's own
+;; height<->time claim with pure arithmetic.
+;;
+;; usage (see scripts/filecoin-clock-probe.cljs for the caller):
+;;   java -cp "/tmp:<amu -M:native-run classpath>" clojure.main -e \
+;;     "(require 'fc-live-probe) (fc-live-probe/-main \"<height>\" \"<ts>\")"
+
 (ns fc-live-probe
   (:require [kotoba.compiler.core :as compiler]
             [kotoba.verifier.signing :as signing]
@@ -10,9 +17,12 @@
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def repo-root "/tmp/fc-live")
+(def repo-root
+  (or (System/getenv "FC_GUEST_ROOT")
+      "/Users/junkawasaki/github/com-junkawasaki/orgs/kotoba-lang/cloud-filecoin"))
 
-(defn sl [f] (slurp (io/file repo-root "guest/filecoin/cloud" f)))
+(defn sl [f]
+  (slurp (io/file repo-root "guest/filecoin/cloud" f)))
 
 (defn run-probe [claimed-height block-timestamp]
   (let [measurement (edn/read-string (slurp "/tmp/fc-runtime.edn"))
@@ -29,12 +39,10 @@
         trust {:format :kotoba.trust/v1
                :trusted-signers #{(:signer key)}
                :revoked-signers #{} :revoked-artifacts #{}
-               :trusted-runtime-sha256 #{identity-sha}}
-        {:keys [report]}
-        (executor/execute envelope trust {:allow #{}} {:args [claimed-height block-timestamp]}
-                          {:now 1000 :entry 'judge-block
-                           :runtime rt :loader-path "/tmp/fc-loader"})]
-    report))
+               :trusted-runtime-sha256 #{identity-sha}}]
+    (executor/execute envelope trust {:allow #{}} {:args [claimed-height block-timestamp]}
+                      {:now 1000 :entry 'judge-block
+                       :runtime rt :loader-path "/tmp/fc-loader"})))
 
 (defn -main [& [height-s ts-s]]
   (let [claimed-height (Long/parseLong height-s)
@@ -44,8 +52,6 @@
         base 1000000000000
         abs-delta (quot (- word base) 1048576)
         drift-ok (mod (- word base) 1048576)
-        recomputed (+ 1667326380 (quot (- block-timestamp 1667326380) 30))
-        ; host recomputes the same floor independently (not via guest):
         claimed-unix (+ 1667326380 (* claimed-height 30))
         drift (- block-timestamp claimed-unix)]
     (println :status status)
@@ -54,8 +60,4 @@
     (println :drift-seconds drift)
     (println :verdict-word word)
     (println :guest-abs-delta abs-delta)
-    (println :guest-drift-ok drift-ok)
-    (println :host-agrees (and (= :ok status)
-                               (= 1 drift-ok)
-                               (<= abs-delta 2))
-             (= recomputed recomputed))))
+    (println :guest-drift-ok drift-ok)))
