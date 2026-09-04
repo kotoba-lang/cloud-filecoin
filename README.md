@@ -152,10 +152,10 @@ and the capability model want anyway.
 
 | Module | Pure | What it decides |
 |---|---|---|
-| `filecoin.cloud.piece-plan` | PURE | Upload geometry before any byte moves: zero-padded size, height, padding, expanded size, the 65-byte floor, a 4 MiB planning ceiling, `plan-fields` folded into one ABI word (`height<<32 \| padding<<16 \| tree-size`). |
+| `filecoin.cloud.piece-plan` | PURE | Upload geometry before any byte moves: zero-padded size, height, padding, expanded size, the 65-byte floor, a 4 MiB planning ceiling, `plan-fields` folded into one ABI word (tree size low 24 bits, padding bits 24–45, height from bit 46 — padding crosses 2^16 at ~128 KiB, which broke the first 16/32-bit packing), and `plan-fields-unpacks` (decode round-trip). |
 | `filecoin.cloud.clock` | PURE | The two genesis instants are THE content: `epoch->unix` / `unix->epoch` on mainnet and calibration, floor semantics (an epoch is the one that has *started*), `deadline-epoch` chaining. Wrong-genesis arithmetic is out by two years and shows no sign of it. |
 | `filecoin.cloud.pay-allowance` | PURE | The funding decision before the calldata: does one month of a rate fit the lockup ceiling (`allowance-fits?`), `rate-for-budget`, `approval-rate`. Whole-balance decimal strings stay in `filecoin.cloud.pay`. |
-| `filecoin.cloud.test` | — | 32 assertions, one i64 sum, expectations as literals quoting the SDK vectors and the two genesis constants. |
+| `filecoin.cloud.test` | — | 30 assertions, one i64 sum, expectations as literals quoting the SDK vectors and the two genesis constants. |
 
 No capabilities: all four modules are PURE, `effects #{}`, and compile with
 an empty policy — deny-by-default costs nothing when the guest carries no
@@ -165,7 +165,7 @@ authority.
 
 1. `amu check --jvm-free` per module and on the closed 4-module project
    route: all `{:ok true}`.
-2. Golden vectors **32/32** through `kototama.native.executor/execute` —
+2. Golden vectors **30/30** through `kototama.native.executor/execute` —
    closed graph compiled with `kotoba.compiler/compile-project`
    (`:aarch64-kotoba-v1`), signed with a fresh Ed25519 keypair, executed
    against a measured runtime (`amu measure-runtime`,
@@ -178,6 +178,12 @@ authority.
    and were corrected against the oracle: `zero-padded-size 4096` is 8128
    (127×2⁶ — the padding grid does not stop for round numbers), and
    `epoch->unix-mainnet 1000` is 1598336400.
+4. Known runtime ceiling: the supervisor seeds the context with a hardcoded
+   512 fuel (`tools/kexe_loader.c`), ignoring the artifact's sealed
+   `:fuel-abi :initial` budget — a runner that recomputes the geometry per
+   assertion traps `:exit 120`. The runner binds each packed word once
+   (`plan-fields-unpacks`) instead. The loader/executor pair reading the
+   sealed budget is owner-level work, flagged in ADR-2609500000.
 
 The existing `.cljc` suite is untouched by this layer: 38 tests, 537
 assertions, still green.
