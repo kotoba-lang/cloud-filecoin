@@ -141,6 +141,47 @@ npm run test:cljs      # nbb
 npm install && npm run vectors   # regenerate
 ```
 
+## The guest layer — the same judgments as `.kotoba`
+
+`guest/` is the **judgment half** of the Synapse flow, written in Kotoba and
+compiled to native code through `amu` (`kotoba compile`), executed through
+kototama-native. The byte path — FR32 expansion, the SHA-256 Merkle tree,
+CBOR, signing, HTTP — stays in `src/` and in the host; the guest owns the
+decisions that travel as i64 scalars, which is the boundary the native ABI
+and the capability model want anyway.
+
+| Module | Pure | What it decides |
+|---|---|---|
+| `filecoin.cloud.piece-plan` | PURE | Upload geometry before any byte moves: zero-padded size, height, padding, expanded size, the 65-byte floor, a 4 MiB planning ceiling, `plan-fields` folded into one ABI word (`height<<32 \| padding<<16 \| tree-size`). |
+| `filecoin.cloud.clock` | PURE | The two genesis instants are THE content: `epoch->unix` / `unix->epoch` on mainnet and calibration, floor semantics (an epoch is the one that has *started*), `deadline-epoch` chaining. Wrong-genesis arithmetic is out by two years and shows no sign of it. |
+| `filecoin.cloud.pay-allowance` | PURE | The funding decision before the calldata: does one month of a rate fit the lockup ceiling (`allowance-fits?`), `rate-for-budget`, `approval-rate`. Whole-balance decimal strings stay in `filecoin.cloud.pay`. |
+| `filecoin.cloud.test` | — | 32 assertions, one i64 sum, expectations as literals quoting the SDK vectors and the two genesis constants. |
+
+No capabilities: all four modules are PURE, `effects #{}`, and compile with
+an empty policy — deny-by-default costs nothing when the guest carries no
+authority.
+
+### Verification (measured 2026-09-04, aarch64)
+
+1. `amu check --jvm-free` per module and on the closed 4-module project
+   route: all `{:ok true}`.
+2. Golden vectors **32/32** through `kototama.native.executor/execute` —
+   closed graph compiled with `kotoba.compiler/compile-project`
+   (`:aarch64-kotoba-v1`), signed with a fresh Ed25519 keypair, executed
+   against a measured runtime (`amu measure-runtime`,
+   `runtime-sha256 1e5182a2…`) pinned in the trust policy. Driver:
+   `host/verify.clj` (the JVM is only the test driver; the guest itself is
+   JVM-free).
+3. Expectations cross-checked under nbb against `filecoin.cloud.piece` and
+   the 20 SDK-generated vectors (`test/filecoin/cloud/vectors.cljc`) before
+   the native run. Two literals taught the wrong lesson on the first pass
+   and were corrected against the oracle: `zero-padded-size 4096` is 8128
+   (127×2⁶ — the padding grid does not stop for round numbers), and
+   `epoch->unix-mainnet 1000` is 1598336400.
+
+The existing `.cljc` suite is untouched by this layer: 38 tests, 537
+assertions, still green.
+
 ## The provider transfer surface
 
 Everything else here is on-chain and moves no bytes. `filecoin.cloud.provider`
