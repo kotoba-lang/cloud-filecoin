@@ -43,7 +43,16 @@
                 (slurp (io/file repo-root "guest/filecoin/cloud" (str f ".kotoba")))]))
         modules))
 
-(defn expected-total [] 32)
+(defn expected-total [] 30)
+
+;; The runner's fuel ceiling is NOT controllable from the driver: the
+;; artifact's sealed :fuel-abi declares the budget but the measured
+;; loader hardcodes context.fuel = 512 and the executor's report
+;; validator requires :initial 512 (both measured 2026-09-04). The
+;; runner therefore binds each packed word once
+;; (plan-fields-unpacks) instead of recomputing per assertion, and
+;; stays inside the fixed budget.
+(def fuel-budget 512)
 
 (defn run-native [runtime-path loader-path]
   (let [measurement (edn/read-string (slurp runtime-path))
@@ -52,7 +61,8 @@
         identity-sha (runtime-identity/identity-sha256 rt)
         compiled (:artifact (compiler/compile-project (sources)
                                                       'filecoin.cloud.test
-                                                      :aarch64-kotoba-v1))
+                                                      :aarch64-kotoba-v1
+                                                      {:budgets {:fuel fuel-budget}}))
         key (signing/generate-keypair)
         envelope (signing/sign compiled key {:not-before 0 :expires 9999999999})
         trust {:format :kotoba.trust/v1

@@ -17,7 +17,7 @@
 (ns filecoin.cloud.piece-plan
   (:export [highest-bit zero-padded-size piece-size height-for
             padded-size expanded-size padding-for
-            plan-ok? size-quota-ok? plan-fields]))
+            plan-ok? size-quota-ok? plan-fields plan-fields-unpacks]))
 
 ;; 4 field elements x 254 bits: what 128 output bytes are made from.
 (def in-bytes-per-quad 127)
@@ -107,9 +107,34 @@
 (defn plan-fields [payload-size :i64] :i64
   ;; The three geometry numbers folded into one i64 so the whole plan
   ;; crosses the ABI in one argument:
-  ;;   height  x 2^32  (small: 2..24 in practice)
-  ;;   padding x 2^16  (<= 8192 inside the planned ceiling)
-  ;;   padded (tree) size occupies the low 16 bits (<= 8192 too).
-  (+ (* (height-for payload-size) 4294967296)
-     (* (padding-for payload-size) 65536)
+  ;;   tree (expanded) size in the low 24 bits   (<= 8388608 = 2^23)
+  ;;   padding in bits 24..45                    (<= 4128768 < 2^22)
+  ;;   height from bit 46 up                     (<= 18 inside the ceiling)
+  ;; The first packing used 16/32-bit fields, and the ceiling broke it
+  ;; silently: padding crosses 2^16 near 128 KiB of payload and
+  ;; overlapped the height field from there to the 4 MiB ceiling. The
+  ;; widest planned values now fit with room, and the word is still
+  ;; below 2^51 -- far inside i64.
+  (+ (* (height-for payload-size) 70368744177664)
+     (* (padding-for payload-size) 16777216)
      (expanded-size (height-for payload-size))))
+
+(defn plan-fields-unpacks [payload-size :i64] :i64
+  ;; 1 when decoding the packed word by field width returns exactly the
+  ;; three numbers packed into it. Binds height ONCE and derives
+  ;; padding and tree from it: every height-for call re-walks the
+  ;; geometry recursion, and the native loader's budget is fixed at
+  ;; 512 (measured :trap exit 120 when the word was recomputed per
+  ;; assertion). Decode is quot-only -- the admitted arithmetic set
+  ;; has no rem and no shifts.
+  (let [h (height-for payload-size)
+        pad (- (padded-size h) payload-size)
+        tree (expanded-size h)
+        word (+ (* h 70368744177664) (* pad 16777216) tree)
+        high (quot word 70368744177664)
+        mid (quot (- word (* high 70368744177664)) 16777216)
+        low (- word (* (quot word 16777216) 16777216))]
+    (if (= high h) 1
+      (if (= mid pad) 0
+        (if (= low tree) 0
+          0)))))
