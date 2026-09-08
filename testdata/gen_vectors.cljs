@@ -20,7 +20,7 @@
   (:require ["@filoz/synapse-core/chains" :as chains]
             ["@filoz/synapse-core/piece" :as piece]
             ["viem" :as viem]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (def payload-sizes
   ;; the boundaries, not round numbers: the 65-byte floor, a full quad (127),
