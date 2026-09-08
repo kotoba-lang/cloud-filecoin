@@ -47,7 +47,7 @@
   Same contract as `filecoin.rpc`: these functions build request maps and
   interpret responses. `filecoin.protocols/IHttp` does the sending, so this
   works on a JVM, under nbb, or in a Worker unchanged."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [filecoin.cloud.piece :as piece]))
 
 (def ^:const min-upload-size
@@ -123,7 +123,7 @@
   Header lookup is case-insensitive because `Location` and `location` are the
   same header and only one of them is what a given server sends."
   [headers]
-  (let [loc (some (fn [[k v]] (when (= "location" (str/lower-case (name k))) v)) headers)]
+  (let [loc (some (fn [[k v]] (when (= "location" (str/lower (name k))) v)) headers)]
     (when-let [seg (some-> loc (str/split #"/") last not-empty)]
       seg)))
 
@@ -167,7 +167,7 @@
   `<domain>/piece/<cid>`, which resolves and 404s and so reads as a missing
   piece rather than a wrong URL."
   [client-address retrieval-domain piece-cid]
-  (str "https://" (str/lower-case (str client-address)) "." retrieval-domain
+  (str "https://" (str/lower (str client-address)) "." retrieval-domain
        "/" piece-cid))
 
 (defn get-piece-request [url]

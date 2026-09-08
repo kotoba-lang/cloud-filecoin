@@ -1,5 +1,5 @@
 (ns filecoin.cloud.provider-test
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [filecoin.cloud.piece :as piece]
             [filecoin.cloud.provider :as prov]))
