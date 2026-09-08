@@ -15,7 +15,7 @@
             [kototama.native.executor :as executor]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (def repo-root
   (or (System/getenv "FC_GUEST_ROOT")

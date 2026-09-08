@@ -22,7 +22,7 @@
 ;;  /tmp/filecoin_cloud_verify.clj)
 
 (ns filecoin-cloud-verify
-  (:require [kotoba.compiler.core :as compiler]
+  (:require [kotoba.lang.text] [kotoba.compiler.core :as compiler]
             [kotoba.verifier.signing :as signing]
             [kotoba.artifact.runtime-identity :as runtime-identity]
             [kototama.native.executor :as executor]
@@ -39,7 +39,7 @@
   (into {}
         (map (fn [f]
                [(symbol (str "filecoin.cloud."
-                             (clojure.string/replace f "_" "-")))
+                             (kotoba.lang.text/replace f "_" "-")))
                 (slurp (io/file repo-root "guest/filecoin/cloud" (str f ".kotoba")))]))
         modules))
 

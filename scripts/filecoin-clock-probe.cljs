@@ -20,7 +20,7 @@
 (ns filecoin-clock-probe
   (:require ["node:child_process" :as child]
             ["node:fs" :as fs]
-            [clojure.string :as str]))
+            [kotoba.lang.text :as str]))
 
 (def home (or (.-env.HOME js/process) (.-HOME js/process) "/Users/junkawasaki"))
 (def amu-dir (str home "/github/com-junkawasaki/orgs/kotoba-lang/amu"))
