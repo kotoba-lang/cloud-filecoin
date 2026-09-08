@@ -1,5 +1,5 @@
 (ns filecoin.cloud.contracts-test
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [ethereum.abi :as abi]
             [filecoin.cloud.chain :as chain]
@@ -101,8 +101,8 @@
   (let [eth (chain/contract :mainnet :pdp-verifier)
         f4 (chain/eth->f4 eth)]
     (is (= "f410f" (subs f4 0 5)))
-    (is (= (str/lower-case eth)
-           (str/lower-case (chain/f4->eth f4))))))
+    (is (= (str/lower eth)
+           (str/lower (chain/f4->eth f4))))))
 
 ;; ── calldata ─────────────────────────────────────────────────────────────────
 

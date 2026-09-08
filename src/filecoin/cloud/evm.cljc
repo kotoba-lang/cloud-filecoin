@@ -34,7 +34,7 @@
   `nonce` from `Filecoin.MpoolGetNonce` — both are calls, and this library
   makes no calls. `filecoin.rpc` builds those request bodies."
   (:require [cbor.core :as cbor]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [filecoin.cloud.chain :as chain]
             [filecoin.message :as msg]
             [filecoin.method :as method]))
