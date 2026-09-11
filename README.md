@@ -136,7 +136,7 @@ Three oracles, none of them this library:
 Both runtimes run the whole suite. **537 assertions, green on both.**
 
 ```sh
-clojure -M:test        # JVM
+kbb -M:test        # JVM
 npm run test:cljs      # nbb
 npm install && npm run vectors   # regenerate
 ```

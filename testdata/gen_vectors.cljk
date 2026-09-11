@@ -1,4 +1,4 @@
-#!/usr/bin/env nbb
+#!/usr/bin/env kbb
 ;; Generate test/filecoin/cloud/vectors.cljk from **FilOzone's own SDK** and
 ;; **viem**.
 ;;
@@ -15,7 +15,7 @@
 ;;   Addresses        @filoz/synapse-core/chains — the deployed contracts, as
 ;;                    published, rather than copied out of a web page.
 ;;
-;;   npm install && nbb testdata/gen_vectors.cljk > test/filecoin/cloud/vectors.cljk
+;;   npm install && kbb --backend sci testdata/gen_vectors.cljk > test/filecoin/cloud/vectors.cljk
 (ns gen-vectors
   (:require ["@filoz/synapse-core/chains" :as chains]
             ["@filoz/synapse-core/piece" :as piece]

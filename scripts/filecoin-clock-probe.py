@@ -15,7 +15,7 @@ Read-only: no keys, no signing, no spend. RPC calls: 1 (eth_getBlockByNumber).
 
 Prereqs (all under /tmp; vanish on reboot -> probe reports skipped):
   /tmp/fc-runtime.edn + /tmp/fc-loader   from: amu measure-runtime
-  /tmp/fc-cp.txt                         from: clojure -Spath -M:native-run (amu)
+  /tmp/fc-cp.txt                         from: kbb -Spath -M:native-run (amu)
   /tmp/fc_live_probe.clj                 copied from host/ by this script
 
 Exit: 0 ok/skipped, 1 answered-badly/unanswered (cron failure signal).
