@@ -1,4 +1,4 @@
-;; host/verify.clj — run the filecoin.cloud guest golden vectors natively.
+;; host/verify.cljk — run the filecoin.cloud guest golden vectors natively.
 ;;
 ;; Three measured steps, the screen-library route:
 ;;   1. compile the closed module graph (4 modules) with
@@ -11,7 +11,7 @@
 ;;
 ;; The expected total (32) is a literal in guest/filecoin/cloud/test.kotoba,
 ;; whose expectations quote the SDK-generated vectors in
-;; test/filecoin/cloud/vectors.cljc (cross-checked against the .cljc oracle
+;; test/filecoin/cloud/vectors.cljk (cross-checked against the .cljc oracle
 ;; under nbb before this run).
 ;;
 ;; usage (JVM is the test driver only — the guest itself is JVM-free):

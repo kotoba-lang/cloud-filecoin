@@ -11,7 +11,7 @@
 ;; The numbers are the same constants the oracle encodes (FRC-0069):
 ;; a quad is 127 source bytes expanded to 128, leaves are 32 bytes,
 ;; the height-2 floor is 65 source bytes. The 20 SDK-generated vectors
-;; in test/filecoin/cloud/vectors.cljc are the ground truth; the golden
+;; in test/filecoin/cloud/vectors.cljk are the ground truth; the golden
 ;; runner (guest/verify.clj) pins 20 of them as literals.
 
 (ns filecoin.cloud.piece-plan

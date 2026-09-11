@@ -170,10 +170,10 @@ authority.
    (`:aarch64-kotoba-v1`), signed with a fresh Ed25519 keypair, executed
    against a measured runtime (`amu measure-runtime`,
    `runtime-sha256 1e5182a2…`) pinned in the trust policy. Driver:
-   `host/verify.clj` (the JVM is only the test driver; the guest itself is
+   `host/verify.cljk` (the JVM is only the test driver; the guest itself is
    JVM-free).
 3. Expectations cross-checked under nbb against `filecoin.cloud.piece` and
-   the 20 SDK-generated vectors (`test/filecoin/cloud/vectors.cljc`) before
+   the 20 SDK-generated vectors (`test/filecoin/cloud/vectors.cljk`) before
    the native run. Two literals taught the wrong lesson on the first pass
    and were corrected against the oracle: `zero-padded-size 4096` is 8128
    (127×2⁶ — the padding grid does not stop for round numbers), and

@@ -65,7 +65,7 @@ def prereqs_ok():
 
 def guest_verdict(claimed_height, block_ts):
     cp = subprocess.run(
-        ["cp", "/tmp/fc-probe/host/live_probe.clj", "/tmp/fc_live_probe.clj"],
+        ["cp", "/tmp/fc-probe/host/live_probe.cljk", "/tmp/fc_live_probe.clj"],
         capture_output=True, text=True)
     if cp.returncode != 0:
         raise RuntimeError("cannot copy guest driver: " + cp.stderr)

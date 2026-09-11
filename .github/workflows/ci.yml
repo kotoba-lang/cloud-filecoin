@@ -37,7 +37,7 @@ jobs:
       # @noble/hashes is not used directly; io-multiformats' :cljs branch
       # loads it at require time for SHA-256.
       - run: npm ci
-      - run: nbb --classpath "$(clojure -A:cljs -Spath)" scripts/verify-cljs.cljs
+      - run: nbb --classpath "$(clojure -A:cljs -Spath)" scripts/verify-cljs.cljk
 
   vectors:
     # PieceCIDs, selectors and addresses all come from upstream packages.
@@ -54,5 +54,5 @@ jobs:
       - name: Regenerate and compare
         run: |
           set -euo pipefail
-          nbb testdata/gen_vectors.cljs > /tmp/vectors.cljc
-          diff -u test/filecoin/cloud/vectors.cljc /tmp/vectors.cljc
+          nbb testdata/gen_vectors.cljk > /tmp/vectors.cljc
+          diff -u test/filecoin/cloud/vectors.cljk /tmp/vectors.cljc

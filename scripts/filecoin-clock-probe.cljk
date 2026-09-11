@@ -15,7 +15,7 @@
 ;; Prereqs (measured on this machine 2026-09-04):
 ;;   /tmp/fc-runtime.edn + /tmp/fc-loader  from: amu measure-runtime
 ;;   /tmp/fc-cp.txt                        from: clojure -Spath -M:native-run in amu
-;;   host/live_probe.clj also on the classpath (/tmp/fc_live_probe.clj)
+;;   host/live_probe.cljk also on the classpath (/tmp/fc_live_probe.clj)
 
 (ns filecoin-clock-probe
   (:require ["node:child_process" :as child]
@@ -46,7 +46,7 @@
 
 (defn guest-verdict! [claimed-height block-ts]
   (let [cp-cmd (str "cp " home
-                    "/github/com-junkawasaki/orgs/kotoba-lang/cloud-filecoin/host/live_probe.clj /tmp/fc_live_probe.clj")]
+                    "/github/com-junkawasaki/orgs/kotoba-lang/cloud-filecoin/host/live_probe.cljk /tmp/fc_live_probe.clj")]
     (sh cp-cmd)
     (let [out (sh (str "cd " amu-dir
                        " && java -cp \"/tmp:$(cat /tmp/fc-cp.txt)\" clojure.main -e \""

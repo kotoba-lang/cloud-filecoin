@@ -1,10 +1,10 @@
-;; host/live_probe.clj — the guest half of the live probe, as a classpath-
+;; host/live_probe.cljk — the guest half of the live probe, as a classpath-
 ;; loadable namespace. The host fetches a REAL calibration block header over
 ;; read-only RPC, hands its scalars to the native guest (kototama executor,
 ;; signed artifact, measured runtime), and the guest judges the chain's own
 ;; height<->time claim with pure arithmetic.
 ;;
-;; usage (see scripts/filecoin-clock-probe.cljs for the caller):
+;; usage (see scripts/filecoin-clock-probe.cljk for the caller):
 ;;   java -cp "/tmp:<amu -M:native-run classpath>" clojure.main -e \
 ;;     "(require 'fc-live-probe) (fc-live-probe/-main \"<height>\" \"<ts>\")"
 
