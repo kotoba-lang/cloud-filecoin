@@ -15,7 +15,7 @@
 ;; under nbb before this run).
 ;;
 ;; usage (JVM is the test driver only — the guest itself is JVM-free):
-;;   cd <amu> && java -cp "/tmp:$(clojure -Spath -M:native-run)" \
+;;   cd <amu> && java -cp "/tmp:$(kbb -Spath -M:native-run)" \
 ;;     clojure.main -e "(require 'filecoin-cloud-verify) (filecoin-cloud-verify/-main)" \
 ;;     /tmp/fc-runtime.edn /tmp/fc-loader
 ;; (the driver file must live on the classpath as
