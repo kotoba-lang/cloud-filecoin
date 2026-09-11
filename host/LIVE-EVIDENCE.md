@@ -1,7 +1,7 @@
 ;; ADR-2609500000 live evidence — kotoba guest judged against REAL Filecoin chains.
 ;;
 ;; (all values below are pasted from the measured session; the probe driver is
-;;  host/live_probe.clj, read-only RPC, no keys)
+;;  host/live_probe.cljk, read-only RPC, no keys)
 ;;
 ;; PROBE 1 — clock: calibration chain head, guest judges the chain's own claim
 ;;
@@ -16,7 +16,7 @@
 ;;      chain's own height<->time mapping EXACTLY, twice, on a live chain.
 ;;
 ;; PROBE 2 — upload plan: oracle PieceCID for a 1017-byte payload (SDK vectors
-;;   pin the same geometry in test/filecoin/cloud/vectors.cljc):
+;;   pin the same geometry in test/filecoin/cloud/vectors.cljk):
 ;;   bafkzcibd64dqndgccvtyie2373ckzv66ofgbwcd3qsuuiix5zrmvheqsy436yobc
 ;;   height 6, padding 1015  (= the plan the guest's piece-plan module computes)
 ;;

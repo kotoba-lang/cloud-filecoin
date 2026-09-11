@@ -2,8 +2,8 @@
   "name": "cloud-filecoin",
   "private": true,
   "scripts": {
-    "test:cljs": "nbb --classpath \"$(clojure -A:cljs -Spath)\" scripts/verify-cljs.cljs",
-    "vectors": "nbb testdata/gen_vectors.cljs > test/filecoin/cloud/vectors.cljc"
+    "test:cljs": "nbb --classpath \"$(clojure -A:cljs -Spath)\" scripts/verify-cljs.cljk",
+    "vectors": "nbb testdata/gen_vectors.cljk > test/filecoin/cloud/vectors.cljk"
   },
   "devDependencies": {
     "@filoz/synapse-core": "^0.7.1",
