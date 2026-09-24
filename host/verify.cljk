@@ -27,7 +27,7 @@
             [kotoba.artifact.runtime-identity :as runtime-identity]
             [kototama.native.executor :as executor]
             [kotoba.lang.edn :as edn]
-            [clojure.java.io :as io]))
+            [kotoba.io :as io]))
 
 (def repo-root
   (or (System/getenv "FC_GUEST_ROOT")
