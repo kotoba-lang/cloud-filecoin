@@ -26,7 +26,7 @@
             [kotoba.verifier.signing :as signing]
             [kotoba.artifact.runtime-identity :as runtime-identity]
             [kototama.native.executor :as executor]
-            [clojure.edn :as edn]
+            [kotoba.lang.edn :as edn]
             [clojure.java.io :as io]))
 
 (def repo-root
