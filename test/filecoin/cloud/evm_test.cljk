@@ -1,5 +1,5 @@
 (ns filecoin.cloud.evm-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [filecoin.address :as addr]
             [filecoin.cloud.chain :as chain]
             [filecoin.cloud.evm :as evm]

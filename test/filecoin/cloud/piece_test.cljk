@@ -1,5 +1,5 @@
 (ns filecoin.cloud.piece-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [filecoin.cloud.piece :as piece]
             [filecoin.cloud.vectors :as v]))
 

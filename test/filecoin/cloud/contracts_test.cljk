@@ -1,6 +1,6 @@
 (ns filecoin.cloud.contracts-test
   (:require [kotoba.lang.text :as str]
-            [clojure.test :refer [deftest is testing]]
+            [kotoba.test :refer [deftest is testing]]
             [ethereum.abi :as abi]
             [filecoin.cloud.chain :as chain]
             [filecoin.cloud.pay :as pay]
