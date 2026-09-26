@@ -171,7 +171,7 @@
        "/" piece-cid))
 
 (defn get-piece-request [url]
-  {:method :get :url url :headers {}})
+  {:method :get :url url :headers {} :response-type :bytes})
 
 ;; ── the check a caller should not skip ───────────────────────────────────────
 

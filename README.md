@@ -229,14 +229,16 @@ the CID tells them apart.
 `scripts/probe-provider.cljs` in `io-filecoin-transport` runs that loop:
 chain `getPieceCid` → `ping` → `find` → `GET piece/<cid>` → recompute.
 
-### One protocol limitation this exposed
+### Binary transfer boundary
 
-`filecoin.protocols/IHttp` specifies `body` as a **String**, and
-`filecoin.transport` builds it with `.text()`. Correct for JSON-RPC, wrong for
-a piece: UTF-8 decoding rewrites every byte above `0x7f`, so binary cannot
-survive the protocol as specified. The probe bypasses `IHttp` with
-`arrayBuffer` and says so; widening the protocol is the real fix and is not
-done here.
+`filecoin.protocols/IHttp` now allows byte request bodies and an opt-in
+`:response-type :bytes`. `filecoin.transport` sends byte PUTs and returns
+unmodified byte GET bodies; `get-piece-request` selects that response type.
+The transport's loopback test covers `00 7f 80 ff` on the JVM and under
+ClojureScript. A caller must still calculate and check the returned PieceCID.
+The existing live probe uses its own `arrayBuffer` path; this transport change
+does not establish a provider upload, on-chain `addPieces`, or retrieval of our
+own archive.
 
 ## What is not here
 
@@ -252,8 +254,8 @@ done here.
   the proofs.
 - **Event log decoding.** Indexed topics hash dynamic types instead of storing
   them, and reading a hash as a value is worse than not reading it.
-- **Piece upload and retrieval.** The provider HTTP API and FilBeam are not
-  modelled.
+- **End-to-end provider custody.** Request builders exist, but this library
+  does not operate a signer, storage contract, or retrieval workflow.
 - **Large pieces.** `calculate` is byte arithmetic over Clojure vectors: fine
   for a manifest or a test fixture, not for a 32 GiB sector. The size math
   (`height-for`, `padded-size`) is cheap at any size; only the hashing is not.

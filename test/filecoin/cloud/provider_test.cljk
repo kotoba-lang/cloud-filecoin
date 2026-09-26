@@ -32,6 +32,13 @@
     (is (= "application/json" (get (:headers r) "content-type")))
     (is (= (str "{\"pieceCid\":\"" cid "\"}") (:body r)))))
 
+(deftest retrieval-asks-for-unmodified-bytes
+  (let [url (prov/piece-url service cid)
+        r (prov/get-piece-request url)]
+    (is (= :get (:method r)))
+    (is (= url (:url r)))
+    (is (= :bytes (:response-type r)))))
+
 (deftest sending-bytes-declares-its-length
   (let [bytes (vec (repeat 200 0x41))
         r (prov/send-bytes-request service "abc-123" bytes)]
